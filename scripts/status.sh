@@ -57,10 +57,14 @@ SESSION="$( { jq -r 'select(type=="object") | (.sessionID // .conversation_id //
 DENIED="$( { jq -r 'select(type=="object") | .denied_actions // empty | length' "$RUN/stdout.jsonl" 2>/dev/null || true; } | head -1)"
 [ -n "$DENIED" ] || DENIED=0
 
-# Best-effort push detection: a remote-tracking ref updated after the run started.
+# Push detection: a remote-tracking ref reflog entry written by a push after the run started.
+# (`git push` records "update by push" in refs/remotes/<remote>/<branch>'s reflog with a timestamp.)
 STARTED="$(jq -r .startedAt "$META")"
+START_EPOCH="$(perl -MTime::Local -e 'my ($y,$mo,$d,$h,$mi,$s)=$ARGV[0]=~/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)Z/; print timegm($s,$mi,$h,$d,$mo-1,$y)' "$STARTED")"
 PUSHED=false
-if git for-each-ref --format='%(refname) %(committerdate:iso-strict)' 'refs/remotes/' 2>/dev/null | awk -v s="$STARTED" '$2 > s {found=1} END {exit !found}'; then PUSHED=true; fi
+for ref in $(git for-each-ref --format='%(refname)' 'refs/remotes/' 2>/dev/null); do
+  if git reflog show --date=raw "$ref" 2>/dev/null | grep 'update by push' | grep -oE '@\{[0-9]+ ' | tr -dc '0-9\n' | awk -v s="$START_EPOCH" '$1 >= s {found=1} END {exit !found}'; then PUSHED=true; break; fi
+done
 
 STATUS=running
 if [ "$ALIVE" = false ]; then STATUS=exited; fi
