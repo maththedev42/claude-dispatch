@@ -6,7 +6,7 @@
 #
 # usage: classify.sh <run-dir>
 # prints JSON: {kind, terminal, retryAt, evidence}
-#   kind: not-installed | credits | auth | rate-limit | timeout | unknown | none
+#   kind: not-installed | credits | auth | rate-limit | model | timeout | unknown | none
 #   none = exit 0 and no error events; the verdict then comes from status.sh.
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -43,6 +43,11 @@ elif grep -qiE '\b(log ?in|login required|unauthori[sz]ed|authenticat\w*|sign[ -
   KIND=auth
 elif grep -qiE '\brate.?limit\b|too many requests|\b429\b|try again in\b' "$SURFACE"; then
   KIND=rate-limit; TERMINAL=false
+elif grep -qiE '\b400\b|bad request|context length|maximum context|too many tokens|model not found|model .* does not exist|unsupported model|invalid model' "$SURFACE"; then
+  # A model-level rejection (seen 2026-10-13: opencode Zen big-pickle answered
+  # `Bad Request: {"model":"big-pickle"}` 400 after 88k tokens of context).
+  # Terminal for THIS model only: the coordinator moves to the next model on the same rung.
+  KIND=model; TERMINAL=true
 elif [ "$EXIT" = "0" ] && [ ! -s "$SURFACE" ]; then
   KIND=none; TERMINAL=false
 fi

@@ -95,6 +95,7 @@ trusted to edit and commit, and nothing else.
 | The executor asks a question (`RESULT: BLOCKED`) | Answered only if the prompt, rules or repo already hold the answer, with the source cited. Otherwise you are notified and the queue stops |
 | Out of credits or logged out | The rung is parked, the same prompt climbs |
 | Rate limit | One wait, then climb |
+| The model itself rejects the request (400, context length) | Next model on the same rung, then climb |
 | Crash, timeout, no `RESULT` line | One retry with a recovery note, then climb |
 | Commit landed | Gates, review, spot checks, report |
 | Tree left dirty | One "finish and commit" re-run on the same session, then stop. The coordinator never commits executor work |

@@ -75,6 +75,7 @@ Read `status.sh` and `classify.sh <runDir>` and take exactly one branch:
 | `verdict` BLOCKED | Invariant 2. If answerable: write the answer under a `# Answer` heading in a note file, `run.sh --session <session> --note <file>` on the same rung. Else notify and stop |
 | `kind` credits or auth | Park the rung (`parked.json`: `{rung, kind, until}`; credits until `retryAt` or "user clears"), escalate the same prompt |
 | `kind` rate-limit | First time: wait `retryAt` or 15 min (a sleep in the background, no time limit), re-run same rung. Second time: escalate |
+| `kind` model (a 400 or "context length" rejection from the model itself) | Next model on the same rung (`run.sh --model`), fresh session, with a recovery note. No models left on the rung: escalate |
 | `kind` timeout, or not-installed, or unknown with HEAD unchanged | First time: re-run same rung with a recovery note ("RECOVERY MODE: a previous attempt stopped; inspect `git status` and `git diff`, continue from the work on disk"). Second time: escalate |
 | `pushed`, `branchChanged`, or the diff touches a path in `dirty-before.txt` | Blocker. Report, stop the queue |
 | `headMoved` false and `dirtyNow` non-empty | One finish re-run on the same session: note "Commit only the files you changed, by path, with a real message; delete the prompt file; end with RESULT". Still dirty afterwards: stop, report paths |
