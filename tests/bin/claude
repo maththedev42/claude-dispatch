@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Fake claude -p --output-format stream-json.
+source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
+cli_ok() {
+  jq -cn '{type:"system",subtype:"init",session_id:"sess_fake1"}'
+  jq -cn --arg t "$1" '{type:"assistant",session_id:"sess_fake1",message:{role:"assistant",content:[{type:"text",text:$t}]}}'
+  jq -cn --arg t "$1" '{type:"result",subtype:"success",result:$t,session_id:"sess_fake1",is_error:false}'
+}
+cli_credits() {
+  echo '{"type":"result","is_error":true,"result":"usage limit reached"}'
+  exit 1
+}
+fake_main "$@"

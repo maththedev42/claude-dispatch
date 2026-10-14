@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Fake opencode. `opencode models` lists a fixed set; `opencode run ...` replays a scenario.
+if [ "${1:-}" = "models" ]; then
+  printf '%s\n' opencode/big-pickle opencode/space-bunny-free
+  exit 0
+fi
+source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
+cli_ok() {
+  jq -cn '{type:"step_start",sessionID:"ses_fake1",part:{type:"step-start"}}'
+  jq -cn --arg t "$1" '{type:"text",sessionID:"ses_fake1",part:{type:"text",text:$t}}'
+  jq -cn '{type:"step_finish",sessionID:"ses_fake1",part:{type:"step-finish",reason:"stop"}}'
+}
+cli_credits() {
+  echo '{"type":"error","error":{"name":"APIError","data":{"message":"CreditsError: insufficient credits","statusCode":401}}}'
+  exit 0   # opencode run exits 0 whatever happened
+}
+fake_main "$@"

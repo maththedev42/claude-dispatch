@@ -1,0 +1,70 @@
+{
+  "$comment": "Copy to <repo>/.claude/dispatch.json (or ~/.dispatch/config.json). Every model id below is an example read from `opencode models` / `agy models` on 2026-10-12; re-read yours.",
+  "promptDir": ".planning/everyday",
+  "order": "overview-table",
+  "overview": ".planning/everyday/00-OVERVIEW.md",
+  "reviewRules": ".planning/everyday/00-OVERVIEW.md",
+  "maxRoundsPerPrompt": 3,
+  "timeoutMinutes": 90,
+  "ladder": [
+    {
+      "kind": "opencode",
+      "note": "Free Zen models, 'limited time'. run.sh keeps only the ones `opencode models` still lists, in this order.",
+      "models": [
+        "opencode/big-pickle",
+        "opencode/space-bunny-free",
+        "opencode/longcat-2.5-preview-free",
+        "opencode/step-5-preview-free",
+        "opencode/exo-free",
+        "opencode/mimo-v2.6-flash-free",
+        "opencode/ling-3.1-flash-free",
+        "opencode/nemotron-3-ultra-free",
+        "opencode/nemotron-3.5-lightning-free"
+      ],
+      "timeoutMinutes": 90
+    },
+    {
+      "kind": "agy",
+      "note": "Antigravity on the Google plan. Settles its own questions in print mode; refused actions arrive in denied_actions.",
+      "models": ["claude-sonnet-5-5-medium"],
+      "timeoutMinutes": 90
+    },
+    {
+      "kind": "claude",
+      "note": "claude -p on the Claude plan. Shares the usage window with the coordinator session, hence last.",
+      "models": [],
+      "timeoutMinutes": 90
+    }
+  ],
+  "env": {
+    "pass": ["HOME", "PATH", "LANG", "TERM", "TMPDIR"],
+    "set": {
+      "OPENCODE_PERMISSION": "{\"question\":\"deny\"}"
+    }
+  },
+  "gates": {
+    "symlink": ["node_modules", "apps/web/node_modules"],
+    "timeoutMinutes": 30,
+    "commands": [
+      "npx tsc --noEmit",
+      "cd apps/web && npx tsc --noEmit",
+      "npm run web:build",
+      "npm run web:test",
+      "npx vitest run",
+      "npm run build"
+    ]
+  },
+  "review": {
+    "model": "sonnet",
+    "checklist": [
+      "Every item of the prompt: done / partly / not done / done wrong, with file:line and a quote.",
+      "For every new or changed test: if the feature were broken, would it still pass? A test that mocks the subject, or asserts only constants or ok, is hollow.",
+      "No invented constants: every model id, price, flag, endpoint, slug in the diff names its source (vendor page, models endpoint, --help, docs).",
+      "Credentials never in config, env, logs, API responses or a command line.",
+      "No test reaches a real host; no live CLI run; nothing started.",
+      "Files touched outside the prompt's scope: list each with a judgement.",
+      "Claims in the commit body that the diff does not support (quoted --help lines, gate results)."
+    ]
+  },
+  "notify": "osascript"
+}

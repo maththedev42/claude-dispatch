@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake agy: prints ONE JSON object.
+source "$(dirname "${BASH_SOURCE[0]}")/_lib.sh"
+cli_ok() {
+  jq -cn --arg t "$1" '{response:$t,status:"OK",conversation_id:"conv_fake1",usage:{},denied_actions:[]}'
+}
+cli_credits() {
+  echo '{"status":"ERROR","error":"You have exhausted your capacity on this model. Resets in 1h2m3s","conversation_id":"conv_fake2"}'
+  exit 1
+}
+fake_main "$@"
