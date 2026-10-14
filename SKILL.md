@@ -86,7 +86,9 @@ Read `status.sh` and `classify.sh <runDir>` and take exactly one branch:
 
 ### verify (HEAD moved)
 1. Read the commits in `status.sh .commits` and their bodies. Claims in a body are
-   checked, never trusted.
+   checked, never trusted. "Pre-existing failure" in particular: run that test file
+   alone at the landed commit and at its parent; a test the commit itself added
+   cannot be pre-existing.
 2. Gates: spawn a subagent (`general-purpose`, the `review.model` from config) with the
    exact command `bash "${CLAUDE_SKILL_DIR}/scripts/gates.sh" <head>` and the machine
    rules; ask for the summary JSON and every failed command's log tail, quoted.
