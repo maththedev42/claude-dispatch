@@ -14,4 +14,8 @@ cli_credits() {
   echo '{"type":"error","error":{"name":"APIError","data":{"message":"CreditsError: insufficient credits","statusCode":401}}}'
   exit 0   # opencode run exits 0 whatever happened
 }
+cli_model400() {
+  echo '{"type":"error","timestamp":1,"sessionID":"ses_fake3","error":{"name":"APIError","data":{"message":"Bad Request: {\"model\":\"big-pickle\"}","statusCode":400,"isRetryable":false}}}'
+  exit 1
+}
 fake_main "$@"

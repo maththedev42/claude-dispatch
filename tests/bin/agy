@@ -8,4 +8,8 @@ cli_credits() {
   echo '{"status":"ERROR","error":"You have exhausted your capacity on this model. Resets in 1h2m3s","conversation_id":"conv_fake2"}'
   exit 1
 }
+cli_model400() {
+  echo '{"status":"ERROR","error":"request exceeds the model'"'"'s maximum context length","conversation_id":"conv_fake3"}'
+  exit 1
+}
 fake_main "$@"

@@ -258,6 +258,37 @@ eq "n: exit codes 0,0,1" "$(j "$GOUT" '[.gates[].exit]|join(",")')" "0,0,1"
 has "n: gate 2 summary has Test Files" "$(j "$GOUT" '.gates[1].summary')" "Test Files"
 eq "n: worktree removed (one entry)" "$(git worktree list | wc -l | tr -d ' ')" 1
 
+# ---- p: model-level rejection ----------------------------------------------
+for r in 0 1 2; do
+  mkrepo; go $r model400; settle
+  case $r in 0) n=opencode;; 1) n=agy;; 2) n=claude;; esac
+  eq "p: $n model kind" "$(j "$CL" .kind)" model
+  eq "p: $n model terminal" "$(j "$CL" .terminal)" true
+  eq "p: $n verdict null" "$(j "$ST" .verdict)" null
+  eq "p: $n headMoved false" "$(j "$ST" .headMoved)" false
+done
+
+# ---- q: --model override ---------------------------------------------------
+mkrepo; go 0 passed --model opencode/space-bunny-free
+eq "q: override exits 0" "$RUNRC" 0
+eq "q: run.sh JSON reports override model" "$(j "$RUNOUT" .model)" opencode/space-bunny-free
+settle
+has "q: argv has -m override" "$ARGVL" "-m opencode/space-bunny-free "
+mkrepo; go 0 passed --model opencode/not-listed
+eq "q: unlisted override exits 0" "$RUNRC" 0
+eq "q: unlisted override reported" "$(j "$RUNOUT" .model)" opencode/not-listed
+settle
+has "q: argv has -m unlisted override" "$ARGVL" "-m opencode/not-listed "
+
+# ---- r: no listed opencode model -------------------------------------------
+mkrepo
+jq '.ladder[0].models=["opencode/gone-a","opencode/gone-b"]' .claude/dispatch.json > "$TMP/cfg.json" \
+  && mv "$TMP/cfg.json" .claude/dispatch.json
+git commit -q -am "gone models"
+go 0 passed
+eq "r: no listed model exits 5" "$RUNRC" 5
+has "r: message names opencode models" "$RUNOUT" "opencode models"
+
 echo
 echo "$PASSES passed, $FAILS failed"
 [ "$FAILS" = 0 ]

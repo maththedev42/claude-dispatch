@@ -10,4 +10,8 @@ cli_credits() {
   echo '{"type":"result","is_error":true,"result":"usage limit reached"}'
   exit 1
 }
+cli_model400() {
+  echo '{"type":"result","is_error":true,"result":"model not found: foo"}'
+  exit 1
+}
 fake_main "$@"

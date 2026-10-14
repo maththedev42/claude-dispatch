@@ -40,6 +40,8 @@ fake_main() {
       exit 0 ;;
     credits401)
       cli_credits ;;
+    model400)
+      cli_model400 ;;
     auth)
       echo "Error: not signed in, run login" >&2; exit 1 ;;
     ratelimit)
