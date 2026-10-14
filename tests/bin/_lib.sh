@@ -25,6 +25,14 @@ fake_main() {
       git commit -q -m "FAKE-01: done"
       cli_ok $'Work finished.\nRESULT: PASSED — committed FAKE-01'
       exit 0 ;;
+    passed_push)
+      touch done.txt
+      [ -n "$task" ] && [ -f "$task" ] && git rm -q -f -- "$task"
+      git add done.txt
+      git commit -q -m "FAKE-01: done"
+      git push -q origin HEAD >/dev/null 2>&1
+      cli_ok $'Work finished and pushed.\nRESULT: PASSED — committed FAKE-01'
+      exit 0 ;;
     blocked)
       cli_ok $'I need a decision.\nRESULT: BLOCKED — which port should the server use?'
       exit 0 ;;

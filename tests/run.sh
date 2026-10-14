@@ -289,6 +289,24 @@ go 0 passed
 eq "r: no listed model exits 5" "$RUNRC" 5
 has "r: message names opencode models" "$RUNOUT" "opencode models"
 
+# ---- s: push detection -----------------------------------------------------
+mkrepo
+git config core.logAllRefUpdates always
+git init -q --bare "$TMP/remote.git"
+git remote add origin "$TMP/remote.git"
+git push -q -u origin HEAD >/dev/null 2>&1
+sleep 2   # reflog timestamps have 1 s resolution: the run must start strictly after this push
+go 0 passed_push; settle
+eq "s: pushed true after a push during the run" "$(j "$ST" .pushed)" true
+eq "s: headMoved true" "$(j "$ST" .headMoved)" true
+eq "s: verdict PASSED" "$(j "$ST" .verdict)" PASSED
+# restore the prompt (unpushed) and run a plain passed run after the earlier push
+git checkout -q HEAD~1 -- "$PROMPT1" && git commit -q -m "restore prompt"
+sleep 2
+go 0 passed; settle
+eq "s: pushed false when only an older push exists" "$(j "$ST" .pushed)" false
+eq "s: second run headMoved true" "$(j "$ST" .headMoved)" true
+
 echo
 echo "$PASSES passed, $FAILS failed"
 [ "$FAILS" = 0 ]
