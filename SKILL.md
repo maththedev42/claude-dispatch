@@ -72,7 +72,7 @@ Read `status.sh` and `classify.sh <runDir>` and take exactly one branch:
 
 | Situation | Action |
 |---|---|
-| `verdict` BLOCKED | Invariant 2. If answerable: write the answer under a `# Answer` heading in a note file, `run.sh --session <session> --note <file>` on the same rung. Else notify and stop |
+| `verdict` BLOCKED | Invariant 2. If answerable: write the answer under a `# Answer` heading in a note file, `run.sh --session <session> --note <file>` on the same rung. Else notify and stop. A question about files "another agent" edited mid-run is answered from the machine, not from the prompt: `ps` for executors, `lsof -d cwd` for processes in the repo, the files' mtimes, and the run's own `tool_use` events (did it write them itself?). No live writer → the files are prior work on the same task, keep and finish. A live writer → stop and notify |
 | `kind` credits or auth | Park the rung (`parked.json`: `{rung, kind, until}`; credits until `retryAt` or "user clears"), escalate the same prompt |
 | `kind` rate-limit | First time: wait `retryAt` or 15 min (a sleep in the background, no time limit), re-run same rung. Second time: escalate |
 | `kind` model (a 400 or "context length" rejection from the model itself) | Next model on the same rung (`run.sh --model`), fresh session, with a recovery note. No models left on the rung: escalate |
